@@ -162,7 +162,7 @@ server.post("/api/notify", async (req, res) => {
 
 const reminder = () => {
   // set rule // 8 AM every day
-  const rule = "*/5 * * * * *";
+  const rule = "*/10 * * * * *";
   // const rule = "*/2 * * * *";
   console.log(schedule.scheduledJobs);
   const jobNames = _.keys(schedule.scheduledJobs);
@@ -231,7 +231,7 @@ const reminder = () => {
                   e.idMembers.length > 1 && i !== 0 ? "," : ""
                 } ${k.fullName}`;
               });
-              let text = `${taskName} ${taskMember} \n`;
+              let text = `${taskName} ${taskMember}`;
               contextText = contextText + text;
             });
           } catch (err) {
