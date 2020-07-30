@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+const _ = require("lodash");
 const axios = require("axios");
 var schedule = require("node-schedule");
 const domain = "https://api.trello.com/1/";
@@ -89,25 +90,25 @@ const password = encodeURIComponent("Admin@123");
 var url = `mongodb://admin:${password}@yunie.cf:27017/admin`;
 
 var conversationReferences = {};
-MongoClient.connect(
-  url,
-  { useNewUrlParser: true, useUnifiedTopology: true },
-  function (err, db) {
-    if (err) throw err;
-    var dbo = db.db("arale");
-    var cursor = dbo.collection("conversation_references").find();
-    cursor.each(function (err, item) {
-      // If the item is null then the cursor is exhausted/empty and closed
-      if (item == null) {
-        db.close(); // you may not want to close the DB if you have more code....
-        return;
-      } else {
-        conversationReferences[item.conversation.id] = item;
-      }
-      // otherwise, do something with the item
-    });
-  }
-);
+// MongoClient.connect(
+//   url,
+//   { useNewUrlParser: true, useUnifiedTopology: true },
+//   function (err, db) {
+//     if (err) throw err;
+//     var dbo = db.db("arale");
+//     var cursor = dbo.collection("conversation_references").find();
+//     cursor.each(function (err, item) {
+//       // If the item is null then the cursor is exhausted/empty and closed
+//       if (item == null) {
+//         db.close(); // you may not want to close the DB if you have more code....
+//         return;
+//       } else {
+//         conversationReferences[item.conversation.id] = item;
+//       }
+//       // otherwise, do something with the item
+//     });
+//   }
+// );
 const myBot = new MyBot(conversationReferences);
 
 // Listen for incoming requests.
@@ -170,10 +171,15 @@ server.post("/api/notify", (req, res) => {
       turnContext.activity
     );
     // set rule // 8 AM every day
-    // const rule = "8 * * *";
-    const rule = "*/10 * * * * *";
-    schedule.scheduleJob(rule, async (conversationReference) => {
-      // console.log("The answer to life, the universe, and everything!");
+    const rule = "19 * * *";
+    // const rule = "*/2 * * * *";
+
+    console.log(schedule.scheduledJobs);
+    const jobNames = _.keys(schedule.scheduledJobs);
+    for (let name of jobNames) schedule.cancelJob(name);
+    // j.reschedule(rule);
+    let j = schedule.scheduleJob(rule, async (conversationReference) => {
+      console.log("The answer to life, the universe, and everything!");
       try {
         conversationReference = tempConversationReference;
         await adapter.continueConversation(
