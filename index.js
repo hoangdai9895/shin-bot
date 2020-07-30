@@ -136,20 +136,6 @@ server.on("upgrade", (req, socket, head) => {
   });
 });
 
-server.post("/git/push", async (req, res) => {
-  console.log(req.body.message);
-  for (let conversationReference of Object.values(conversationReferences)) {
-    await adapter.continueConversation(
-      conversationReference,
-      async (turnContext) => {
-        // console.log(conversationReference);
-        await turnContext.sendActivity(req.body.message);
-      }
-    );
-  }
-  sendResponse(res, JSON.stringify(req.body.message));
-});
-
 function sendConfirm(res, msg) {
   res.setHeader("Content-Type", "text/html");
   res.writeHead(200);
@@ -164,100 +150,103 @@ function sendResponse(res, msg) {
   res.end();
 }
 
-server.post("/api/notify", (req, res) => {
+server.post("/api/notify", async (req, res) => {
   // Use the adapter to process the incoming web request into a TurnContext object.
   adapter.processActivity(req, res, async (turnContext) => {
     tempConversationReference = await TurnContext.getConversationReference(
       turnContext.activity
     );
-    // set rule // 8 AM every day
-    const rule = "23 * * *";
-    // const rule = "*/2 * * * *";
-
-    console.log(schedule.scheduledJobs);
-    const jobNames = _.keys(schedule.scheduledJobs);
-    for (let name of jobNames) schedule.cancelJob(name);
-    // j.reschedule(rule);
-    let j = schedule.scheduleJob(rule, async (conversationReference) => {
-      console.log("The answer to life, the universe, and everything!");
-      try {
-        conversationReference = tempConversationReference;
-        await adapter.continueConversation(
-          conversationReference,
-          async (turnContext) => {
-            const boardId = "5f14457b33a4275b58d553a4";
-            let contextText = "Các task trong ngày: \n";
-            // get list
-            try {
-              listData = await axios.get(
-                `${domain}boards/${boardId}/lists${requiredParam}`
-              );
-              const lists = listData.data;
-              let list = {};
-              lists.forEach((e) => {
-                if (e.name == "Hàng ngày") {
-                  list = e;
-                }
-              });
-              // get member
-              let members = [];
-              membersData = await axios.get(
-                `${domain}boards/${boardId}/members${requiredParam}`
-              );
-              members = membersData.data;
-
-              // get cards
-              let cards = [];
-              cardsData = await axios.get(
-                `${domain}boards/${boardId}/cards${requiredParam}`
-              );
-              cardsData.data.forEach((e) => {
-                cards = e.idList === list.id ? [...cards, e] : [...cards];
-              });
-
-              cards = cards.map((e) => ({
-                ...e,
-                idMembers: e.idMembers.map((_) => ({ id: _ })),
-              }));
-
-              cards.forEach((e) => {
-                e.idMembers.forEach((m) => {
-                  members.forEach((k) => {
-                    if (k.id === m.id) {
-                      m.username = k.username;
-                      m.fullName = k.fullName;
-                    }
-                  });
-                });
-              });
-
-              //   console.log(cards);
-
-              cards.forEach((e) => {
-                let taskName = `   - ${e.name}: `;
-                let taskMember = "";
-                e.idMembers.forEach((k, i) => {
-                  taskMember = `${taskMember}${
-                    e.idMembers.length > 1 && i !== 0 ? "," : ""
-                  } ${k.fullName}`;
-                });
-                let text = `${taskName} ${taskMember} \n`;
-                contextText = contextText + text;
-              });
-            } catch (err) {
-              // console.log(err.response.data);
-              contextText = "Board ID không đúng !!";
-            }
-
-            await turnContext.sendActivity(MessageFactory.text(contextText));
-          }
-        );
-      } catch (error) {
-        console.log(error);
-      }
-    });
+    reminder();
   });
 });
+
+const reminder = () => {
+  // set rule // 8 AM every day
+  const rule = "*/5 * * * * *";
+  // const rule = "*/2 * * * *";
+  console.log(schedule.scheduledJobs);
+  const jobNames = _.keys(schedule.scheduledJobs);
+  for (let name of jobNames) schedule.cancelJob(name);
+  // j.reschedule(rule);
+  let j = schedule.scheduleJob(rule, async (conversationReference) => {
+    console.log("The answer to life, the universe, and everything!");
+    try {
+      conversationReference = tempConversationReference;
+      await adapter.continueConversation(
+        conversationReference,
+        async (turnContext) => {
+          const boardId = "5f14457b33a4275b58d553a4";
+          let contextText = "Các task trong ngày:";
+          // get list
+          try {
+            listData = await axios.get(
+              `${domain}boards/${boardId}/lists${requiredParam}`
+            );
+            const lists = listData.data;
+            let list = {};
+            lists.forEach((e) => {
+              if (e.name == "Hàng ngày") {
+                list = e;
+              }
+            });
+            // get member
+            let members = [];
+            membersData = await axios.get(
+              `${domain}boards/${boardId}/members${requiredParam}`
+            );
+            members = membersData.data;
+
+            // get cards
+            let cards = [];
+            cardsData = await axios.get(
+              `${domain}boards/${boardId}/cards${requiredParam}`
+            );
+            cardsData.data.forEach((e) => {
+              cards = e.idList === list.id ? [...cards, e] : [...cards];
+            });
+
+            cards = cards.map((e) => ({
+              ...e,
+              idMembers: e.idMembers.map((_) => ({ id: _ })),
+            }));
+
+            cards.forEach((e) => {
+              e.idMembers.forEach((m) => {
+                members.forEach((k) => {
+                  if (k.id === m.id) {
+                    m.username = k.username;
+                    m.fullName = k.fullName;
+                  }
+                });
+              });
+            });
+
+            //   console.log(cards);
+
+            cards.forEach((e) => {
+              let taskName = `   - ${e.name}: `;
+              let taskMember = "";
+              e.idMembers.forEach((k, i) => {
+                taskMember = `${taskMember}${
+                  e.idMembers.length > 1 && i !== 0 ? "," : ""
+                } ${k.fullName}`;
+              });
+              let text = `${taskName} ${taskMember} \n`;
+              contextText = contextText + text;
+            });
+          } catch (err) {
+            // console.log(err.response.data);
+            contextText = "Board ID không đúng !!";
+          }
+
+          await turnContext.sendActivity(MessageFactory.text(contextText));
+        }
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  });
+};
 
 // az ad app create --display-name "Shin-bot" --password "01216266317Aa" --available-to-other-tenants
 
