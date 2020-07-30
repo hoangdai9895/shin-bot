@@ -162,8 +162,8 @@ server.post("/api/notify", async (req, res) => {
 
 const reminder = () => {
   // set rule // 8 AM every day
-  const rule = "0 * * *";
-  // const rule = "*/2 * * * *";
+  // const rule = "0 * * *";
+  const rule = "*/10 * * * * *";
   console.log(schedule.scheduledJobs);
   const jobNames = _.keys(schedule.scheduledJobs);
   for (let name of jobNames) schedule.cancelJob(name);
@@ -176,7 +176,7 @@ const reminder = () => {
         conversationReference,
         async (turnContext) => {
           const boardId = "5f14457b33a4275b58d553a4";
-          let contextText = "Các task trong ngày:";
+          let contextText = "Các task trong ngày:\n\n\u200C";
           // get list
           try {
             listData = await axios.get(
@@ -231,7 +231,7 @@ const reminder = () => {
                   e.idMembers.length > 1 && i !== 0 ? "," : ""
                 } ${k.fullName}`;
               });
-              let text = `${taskName} ${taskMember}`;
+              let text = `${taskName} ${taskMember}\n\n\u200C`;
               contextText = contextText + text;
             });
           } catch (err) {
@@ -240,6 +240,9 @@ const reminder = () => {
           }
 
           await turnContext.sendActivity(MessageFactory.text(contextText));
+          // await turnContext.sendActivity(
+          //   MessageFactory.text("aa bb")
+          // );
         }
       );
     } catch (error) {
