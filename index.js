@@ -252,6 +252,11 @@ server.post("/api/notify", (req, res) => {
     });
   });
 });
-//az deployment sub create --template-file "D:\CODE\BOT\shin\deploymentTemplates\template-with-new-rg.json" --location southeastasia --parameters appId="afb00647-d951-4ceb-bd76-1afa54d6d9de" appSecret="01216266317Aa" botId="shin-bot" botSku=F0 newAppServicePlanName="shin-bot" newWebAppName="shin-bot-web" groupName="Shin" groupLocation="eastus" newAppServicePlanLocation="southeastasia" --name shin-service
 
-//az webapp deployment source config-zip --resource-group "Shin" --name "shin-bot-web" --src "D:\CODE\BOT\shin\shin.zip"
+// az ad app create --display-name "Shin-bot" --password "01216266317Aa" --available-to-other-tenants
+
+//
+
+//az deployment sub create --template-file "./deploymentTemplates/template-with-new-rg.json" --location southeastasia --parameters appId="a253cc85-8932-4407-a940-c57cd81969b8" appSecret="01216266317Aa" botId="Shin-bot" botSku=F0 newAppServicePlanName="shin-service" newWebAppName="shin-bot-web" groupName="Shin" groupLocation="eastus" newAppServicePlanLocation="southeastasia" --name "shin-service"
+
+//az webapp deployment source config-zip --resource-group "Shin" --name "shin-bot-web" --src "shin.zip"
