@@ -1,0 +1,25 @@
+{
+  "name": "shin",
+  "version": "1.0.0",
+  "description": "shin bot for fun",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [
+    "shin",
+    "bot"
+  ],
+  "author": "dailch",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "botbuilder": "^4.9.3",
+    "dotenv": "^8.2.0",
+    "mongodb": "^3.5.9",
+    "node-schedule": "^1.3.2",
+    "nodemon": "^2.0.4",
+    "restify": "^8.5.1"
+  }
+}
