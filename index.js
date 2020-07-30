@@ -171,7 +171,7 @@ server.post("/api/notify", (req, res) => {
       turnContext.activity
     );
     // set rule // 8 AM every day
-    const rule = "19 * * *";
+    const rule = "23 * * *";
     // const rule = "*/2 * * * *";
 
     console.log(schedule.scheduledJobs);
