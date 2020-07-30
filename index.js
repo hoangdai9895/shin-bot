@@ -162,7 +162,7 @@ server.post("/api/notify", async (req, res) => {
 
 const reminder = () => {
   // set rule // 8 AM every day
-  const rule = "*/10 * * * * *";
+  const rule = "0 * * *";
   // const rule = "*/2 * * * *";
   console.log(schedule.scheduledJobs);
   const jobNames = _.keys(schedule.scheduledJobs);
