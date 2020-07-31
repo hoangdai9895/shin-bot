@@ -162,11 +162,8 @@ server.post("/api/notify", async (req, res) => {
 
 const reminder = () => {
   // set rule // 8 AM every day
+  // const rule = "*/1 * * * * *";
   const rule = "8 * * *";
-
-  // const rule = "*/10 * * * * *";
-  // const rule = new schedule.RecurrenceRule();
-  // rule.hour = 8;
 
   const jobNames = _.keys(schedule.scheduledJobs);
   console.log(jobNames);
@@ -181,70 +178,69 @@ const reminder = () => {
         async (turnContext) => {
           const boardId = "5f14457b33a4275b58d553a4";
           let contextText = "Các task trong ngày:\n\n\u200C";
+          let list = {};
+          let members = [];
+          let cards = [];
           // get list
-          try {
-            listData = await axios.get(
-              `${domain}boards/${boardId}/lists${requiredParam}`
-            );
-            const lists = listData.data;
-            let list = {};
-            lists.forEach((e) => {
-              if (e.name == "Hàng ngày") {
-                list = e;
-              }
-            });
-            // get member
-            let members = [];
-            membersData = await axios.get(
-              `${domain}boards/${boardId}/members${requiredParam}`
-            );
-            members = membersData.data;
+          let listData = await axios.get(
+            `${domain}boards/${boardId}/lists${requiredParam}`
+          );
+          const lists = listData.data;
+          // lists.length > 0 &&
+          lists.forEach((e) => {
+            if (e.name == "Hàng ngày") {
+              list = e;
+            }
+          });
 
-            // get cards
-            let cards = [];
-            cardsData = await axios.get(
-              `${domain}boards/${boardId}/cards${requiredParam}`
-            );
-            cardsData.data.forEach((e) => {
-              cards = e.idList === list.id ? [...cards, e] : [...cards];
-            });
+          // get member
+          let membersData = await axios.get(
+            `${domain}boards/${boardId}/members${requiredParam}`
+          );
+          members = membersData.data;
 
-            cards = cards.map((e) => ({
-              ...e,
-              idMembers: e.idMembers.map((_) => ({ id: _ })),
-            }));
+          // get cards
+          let cardsData = await axios.get(
+            `${domain}boards/${boardId}/cards${requiredParam}`
+          );
+          // cardsData.length > 0 &&
+          cardsData.data.forEach((e) => {
+            cards = e.idList === list.id ? [...cards, e] : [...cards];
+          });
 
-            cards.forEach((e) => {
-              e.idMembers.forEach((m) => {
-                members.forEach((k) => {
-                  if (k.id === m.id) {
-                    m.username = k.username;
-                    m.fullName = k.fullName;
-                  }
-                });
+          cards = cards.map((e) => ({
+            ...e,
+            idMembers: e.idMembers.map((_) => ({ id: _ })),
+          }));
+
+          cards.forEach((e) => {
+            e.idMembers.forEach((m) => {
+              members.forEach((k) => {
+                if (k.id === m.id) {
+                  m.username = k.username;
+                  m.fullName = k.fullName;
+                }
               });
             });
+          });
 
-            //   console.log(cards);
+          //   console.log(cards);
 
-            cards.forEach((e) => {
-              let taskName = `   - ${e.name}: `;
-              let taskMember = "";
-              e.idMembers.forEach((k, i) => {
-                taskMember = `${taskMember}${
-                  e.idMembers.length > 1 && i !== 0 ? " ," : ""
-                } ${k.fullName}`;
-              });
-              let text = `${taskName} ${taskMember}\n\n\u200C`;
-              contextText = contextText + text;
+          cards.forEach((e, index) => {
+            let taskName = `   - ${e.name}: `;
+            let taskMember = "";
+            e.idMembers.forEach((k, i) => {
+              taskMember = `${taskMember}${
+                e.idMembers.length > 1 && i !== 0 ? " ," : ""
+              } ${k.fullName}`;
             });
+            let text = `${taskName} ${taskMember}${
+              index !== cards.length - 1 ? "\n\n\u200C" : ""
+            }`;
+            contextText = contextText + text;
+          });
 
-            await turnContext.sendActivity(MessageFactory.text(contextText));
-          } catch (err) {
-            console.log(err.response.data);
-            // log = "Board ID không đúng !!";
-          }
-
+          await turnContext.sendActivity(MessageFactory.text(contextText));
           // await turnContext.sendActivity(
           //   MessageFactory.text("aa bb")
           // );
