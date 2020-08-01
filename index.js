@@ -150,8 +150,19 @@ function sendResponse(res, msg) {
   res.end();
 }
 
+// server.post("/api/notify", (req, res) => {
+//   // Use the adapter to process the incoming web request into a TurnContext object.
+//   adapter.processActivity(req, res, async (turnContext) => {
+//     tempConversationReference = await TurnContext.getConversationReference(
+//       turnContext.activity
+//     );
+//     reminder();
+//   });
+// });
+
 server.post("/api/notify", async (req, res) => {
   // Use the adapter to process the incoming web request into a TurnContext object.
+
   adapter.processActivity(req, res, async (turnContext) => {
     tempConversationReference = await TurnContext.getConversationReference(
       turnContext.activity
@@ -163,7 +174,10 @@ server.post("/api/notify", async (req, res) => {
 const reminder = () => {
   // set rule // 8 AM every day
   // const rule = "*/1 * * * * *";
-  const rule = "8 * * *";
+  // const rule = "* * 8 * * *";
+  var rule = new schedule.RecurrenceRule();
+  rule.hour = 10;
+  rule.minute = 0;
 
   const jobNames = _.keys(schedule.scheduledJobs);
   console.log(jobNames);
