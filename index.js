@@ -180,7 +180,7 @@ const reminder = (xxx) => {
     let second = e.getSeconds();
     console.log("The answer to life, the universe, and everything!");
     try {
-      if (hour === 8 && minute === 0 && second === 0) {
+      if (hour === 1 && minute === 0 && second === 0) {
         let conversationReference = xxx;
         await adapter.continueConversation(
           conversationReference,
