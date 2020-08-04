@@ -188,9 +188,7 @@ const reminder = (xxx) => {
           conversationReference,
           async (turnContext) => {
             const boardId = "5f14457b33a4275b58d553a4";
-            let contextText = `Các task trong ngày:\n\n\u200C @${
-              turnContext.activity.recipient.name
-            } ${JSON.stringify(turnContext.activity.from)}`;
+            let contextText = `Các task trong ngày:\n\n\u200C @Đại ${JSON.stringify(turnContext.activity.from)}`;
             let list = {};
             let members = [];
             let cards = [];
