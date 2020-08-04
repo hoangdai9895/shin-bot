@@ -158,13 +158,14 @@ server.post("/api/notify", async (req, res) => {
       turnContext.activity
     );
     reminder(tempConversationReference);
+    console.log(turnContext.activity);
   });
 });
 
 const reminder = (xxx) => {
   // set rule // 8 AM every day
-  // const rule = "*/1 * * * * *";
-  const rule = "0 */2 * * * *";
+  const rule = "*/5 * * * * *";
+  // const rule = "0 */2 * * * *";
 
   // const jobNames = _.keys(schedule.scheduledJobs);
   // console.log(jobNames);
@@ -180,13 +181,16 @@ const reminder = (xxx) => {
     let second = e.getSeconds();
     console.log("The answer to life, the universe, and everything!");
     try {
-      if (hour === 1 && minute === 0 && second === 0) {
+      // if (hour === 1 && minute === 0 && second === 0) {
+      if (true) {
         let conversationReference = xxx;
         await adapter.continueConversation(
           conversationReference,
           async (turnContext) => {
             const boardId = "5f14457b33a4275b58d553a4";
-            let contextText = "Các task trong ngày:\n\n\u200C";
+            let contextText = `Các task trong ngày:\n\n\u200C @${
+              turnContext.activity.from.name
+            } ${JSON.stringify(turnContext.activity.from)}`;
             let list = {};
             let members = [];
             let cards = [];
