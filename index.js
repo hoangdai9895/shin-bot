@@ -145,8 +145,8 @@ server.post("/api/notify", async (req, res) => {
 
 const reminder = (tempconversationReference) => {
   // set rule // 8 AM every day
-  const rule = "*/10 * * * * *";
-  // const rule = "0 */2 * * * *";
+  // const rule = "*/10 * * * * *";
+  const rule = "0 */5 * * * *";
 
   // const jobNames = _.keys(schedule.scheduledJobs);
   // console.log(jobNames);
@@ -160,8 +160,8 @@ const reminder = (tempconversationReference) => {
     let date = e.getDate(); // date of month
     console.log("Reminder!!");
     let conversationReference = tempconversationReference;
-    // if (hour === 1 && minute === 0 && second === 0) {
-    if (true) {
+    if (hour === 1 && minute === 0 && second === 0) {
+      // if (true) {
       await adapter.continueConversation(
         conversationReference,
         async (turnContext) => {
