@@ -162,11 +162,15 @@ server.post("/api/notify", async (req, res) => {
 
 const reminder = () => {
   // set rule // 8 AM every day
-  // const rule = "0 * * *";
-  const rule = "*/10 * * * * *";
-  console.log(schedule.scheduledJobs);
+  const rule = "8 * * *";
+
+  // const rule = "*/10 * * * * *";
+  // const rule = new schedule.RecurrenceRule();
+  // rule.hour = 8;
+
   const jobNames = _.keys(schedule.scheduledJobs);
-  for (let name of jobNames) schedule.cancelJob(name);
+  console.log(jobNames);
+  if (jobNames.length > 0) for (let name of jobNames) schedule.cancelJob(name);
   // j.reschedule(rule);
   let j = schedule.scheduleJob(rule, async (conversationReference) => {
     console.log("The answer to life, the universe, and everything!");
@@ -228,18 +232,19 @@ const reminder = () => {
               let taskMember = "";
               e.idMembers.forEach((k, i) => {
                 taskMember = `${taskMember}${
-                  e.idMembers.length > 1 && i !== 0 ? "," : ""
+                  e.idMembers.length > 1 && i !== 0 ? " ," : ""
                 } ${k.fullName}`;
               });
               let text = `${taskName} ${taskMember}\n\n\u200C`;
               contextText = contextText + text;
             });
+
+            await turnContext.sendActivity(MessageFactory.text(contextText));
           } catch (err) {
-            // console.log(err.response.data);
-            contextText = "Board ID không đúng !!";
+            console.log(err.response.data);
+            // log = "Board ID không đúng !!";
           }
 
-          await turnContext.sendActivity(MessageFactory.text(contextText));
           // await turnContext.sendActivity(
           //   MessageFactory.text("aa bb")
           // );
