@@ -196,7 +196,7 @@ const renderSubtext = (type, length) => {
     "Hàng tháng": "cuối tháng",
     "Theo kế hoạch": "theo kế hoạch",
   };
-  return `* Các tasks ${texts[type]}:${length > 0 ? "\n\n\u200C" : ""}`;
+  return `Các tasks ${texts[type]}:${length > 0 ? "\n\n\u200C" : ""}`;
 };
 
 const renderText = async (members, lists, cardList, day, date) => {
