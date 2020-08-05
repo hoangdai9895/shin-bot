@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 const _ = require("lodash");
+const moment = require("moment");
 const axios = require("axios");
-var schedule = require("node-schedule");
+const schedule = require("node-schedule");
 const domain = "https://api.trello.com/1/";
 const key = "e87cdfdeabab33fd2824771a0ca38bb0";
 const token =
@@ -150,118 +151,113 @@ function sendResponse(res, msg) {
   res.end();
 }
 
-// server.post("/api/notify", (req, res) => {
-//   // Use the adapter to process the incoming web request into a TurnContext object.
-//   adapter.processActivity(req, res, async (turnContext) => {
-//     tempConversationReference = await TurnContext.getConversationReference(
-//       turnContext.activity
-//     );
-//     reminder();
-//   });
-// });
-
 server.post("/api/notify", async (req, res) => {
   // Use the adapter to process the incoming web request into a TurnContext object.
-
   adapter.processActivity(req, res, async (turnContext) => {
-    tempConversationReference = await TurnContext.getConversationReference(
+    let tempConversationReference = await TurnContext.getConversationReference(
       turnContext.activity
     );
-    reminder();
+    reminder(tempConversationReference);
   });
 });
 
-const reminder = () => {
+const reminder = (xxx) => {
   // set rule // 8 AM every day
   // const rule = "*/1 * * * * *";
-  // const rule = "* * 8 * * *";
-  var rule = new schedule.RecurrenceRule();
-  rule.hour = 10;
-  rule.minute = 0;
+  const rule = "0 */2 * * * *";
 
-  const jobNames = _.keys(schedule.scheduledJobs);
-  console.log(jobNames);
-  if (jobNames.length > 0) for (let name of jobNames) schedule.cancelJob(name);
+  // const jobNames = _.keys(schedule.scheduledJobs);
+  // console.log(jobNames);
+  // if (jobNames.length > 0) for (let name of jobNames) schedule.cancelJob(name);
   // j.reschedule(rule);
-  let j = schedule.scheduleJob(rule, async (conversationReference) => {
+  schedule.scheduleJob(rule, async (e) => {
+    // console.log(e.getSeconds());
+    // console.log(e.getMinutes());
+    // console.log(e.getHours());
+
+    let hour = e.getHours();
+    let minute = e.getMinutes();
+    let second = e.getSeconds();
     console.log("The answer to life, the universe, and everything!");
     try {
-      conversationReference = tempConversationReference;
-      await adapter.continueConversation(
-        conversationReference,
-        async (turnContext) => {
-          const boardId = "5f14457b33a4275b58d553a4";
-          let contextText = "Các task trong ngày:\n\n\u200C";
-          let list = {};
-          let members = [];
-          let cards = [];
-          // get list
-          let listData = await axios.get(
-            `${domain}boards/${boardId}/lists${requiredParam}`
-          );
-          const lists = listData.data;
-          // lists.length > 0 &&
-          lists.forEach((e) => {
-            if (e.name == "Hàng ngày") {
-              list = e;
-            }
-          });
+      if (hour === 8 && minute === 0 && second === 0) {
+        let conversationReference = xxx;
+        await adapter.continueConversation(
+          conversationReference,
+          async (turnContext) => {
+            const boardId = "5f14457b33a4275b58d553a4";
+            let contextText = "Các task trong ngày:\n\n\u200C";
+            let list = {};
+            let members = [];
+            let cards = [];
+            // get list
+            let listData = await axios.get(
+              `${domain}boards/${boardId}/lists${requiredParam}`
+            );
+            const lists = listData.data;
+            // lists.length > 0 &&
+            lists.forEach((e) => {
+              if (e.name == "Hàng ngày") {
+                list = e;
+              }
+            });
 
-          // get member
-          let membersData = await axios.get(
-            `${domain}boards/${boardId}/members${requiredParam}`
-          );
-          members = membersData.data;
+            // get member
+            let membersData = await axios.get(
+              `${domain}boards/${boardId}/members${requiredParam}`
+            );
+            members = membersData.data;
 
-          // get cards
-          let cardsData = await axios.get(
-            `${domain}boards/${boardId}/cards${requiredParam}`
-          );
-          // cardsData.length > 0 &&
-          cardsData.data.forEach((e) => {
-            cards = e.idList === list.id ? [...cards, e] : [...cards];
-          });
+            // get cards
+            let cardsData = await axios.get(
+              `${domain}boards/${boardId}/cards${requiredParam}`
+            );
+            // cardsData.length > 0 &&
+            cardsData.data.forEach((e) => {
+              cards = e.idList === list.id ? [...cards, e] : [...cards];
+            });
 
-          cards = cards.map((e) => ({
-            ...e,
-            idMembers: e.idMembers.map((_) => ({ id: _ })),
-          }));
+            cards = cards.map((e) => ({
+              ...e,
+              idMembers: e.idMembers.map((_) => ({ id: _ })),
+            }));
 
-          cards.forEach((e) => {
-            e.idMembers.forEach((m) => {
-              members.forEach((k) => {
-                if (k.id === m.id) {
-                  m.username = k.username;
-                  m.fullName = k.fullName;
-                }
+            cards.forEach((e) => {
+              e.idMembers.forEach((m) => {
+                members.forEach((k) => {
+                  if (k.id === m.id) {
+                    m.username = k.username;
+                    m.fullName = k.fullName;
+                  }
+                });
               });
             });
-          });
 
-          //   console.log(cards);
+            //   console.log(cards);
 
-          cards.forEach((e, index) => {
-            let taskName = `   - ${e.name}: `;
-            let taskMember = "";
-            e.idMembers.forEach((k, i) => {
-              taskMember = `${taskMember}${
-                e.idMembers.length > 1 && i !== 0 ? " ," : ""
-              } ${k.fullName}`;
+            cards.forEach((e, index) => {
+              let taskName = `   - ${e.name}: `;
+              let taskMember = "";
+              e.idMembers.forEach((k, i) => {
+                taskMember = `${taskMember}${
+                  e.idMembers.length > 1 && i !== 0 ? " ," : ""
+                } ${k.fullName}`;
+              });
+              let text = `${taskName} ${taskMember}${
+                index !== cards.length - 1 ? "\n\n\u200C" : ""
+              }`;
+              contextText = contextText + text;
             });
-            let text = `${taskName} ${taskMember}${
-              index !== cards.length - 1 ? "\n\n\u200C" : ""
-            }`;
-            contextText = contextText + text;
-          });
 
-          await turnContext.sendActivity(MessageFactory.text(contextText));
-          // await turnContext.sendActivity(
-          //   MessageFactory.text("aa bb")
-          // );
-        }
-      );
-    } catch (error) {
-      console.log(error);
+            await turnContext.sendActivity(MessageFactory.text(contextText));
+            // await turnContext.sendActivity(
+            //   MessageFactory.text("aa bb")
+            // );
+          }
+        );
+      }
+    } catch (err) {
+      console.log("====err===", err);
     }
   });
 };
