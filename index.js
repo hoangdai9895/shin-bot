@@ -196,7 +196,7 @@ const renderSubtext = (type, length) => {
     "Hàng tháng": "cuối tháng",
     "Theo kế hoạch": "theo kế hoạch",
   };
-  return `Các tasks ${texts[type]}:${length > 0 ? "\n\n\u200C" : ""}`;
+  return `*Các tasks ${texts[type]}:${length > 0 ? "\n\n\u200C" : ""}*`;
 };
 
 const renderText = async (members, lists, cardList, day, date) => {
@@ -210,7 +210,7 @@ const renderText = async (members, lists, cardList, day, date) => {
 
   let text = "";
 
-  routine.forEach((item, idx) => {
+  routine.forEach((item) => {
     let contextText = "";
     let cards = [];
     let list = {};
@@ -270,13 +270,11 @@ const renderText = async (members, lists, cardList, day, date) => {
         });
         let line = `${taskName} (${moment(e.due).format(
           "HH:MM DD/MM/YYYY"
-        )}): ${taskMember}${
-          index !== cards.length - 1 || cards.length !== 1 ? "\n\n\u200C" : ""
-        }`;
+        )}): ${taskMember}${cards.length > 1 ? "\n\n\u200C" : ""}`;
         contextText = `${contextText} ${line}`;
       });
     // console.log(contextText);
-    text = `${text} ${idx === 0 ? "" : "\n\n\u200C"} ${contextText}`;
+    text = `${text} ${contextText}`;
   });
   // console.log(text);
 
