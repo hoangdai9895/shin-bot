@@ -19,7 +19,7 @@
     "botbuilder": "^4.9.3",
     "dotenv": "^8.2.0",
     "lodash": "^4.17.19",
-    "moment": "^2.27.0",
+    "moment": "^2.29.4",
     "mongodb": "^3.5.9",
     "node-schedule": "^1.3.2",
     "nodemon": "^2.0.4",
